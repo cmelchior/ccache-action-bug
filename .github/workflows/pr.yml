@@ -43,5 +43,5 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          make --directory=../
-          ../hello_cmake
+          make
+          ./hello_cmake
