@@ -1,0 +1,46 @@
+name: PR Build
+on:
+  pull_request:
+    paths-ignore:
+    - '**.md'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.12
+        with:
+          cmake-version: '3.22.1'
+
+      - name: Setup ninja
+        uses: ashutoshvarma/setup-ninja@master
+        with:
+          version: '1.11.0'
+ 
+      - name: Install ccache
+        uses: hendrikmuhs/ccache-action@v1.2.2
+        with:
+          key: ${{ github.job }}
+          max-size: '2.0G'
+
+      - name: Prepend ccache executables to the PATH
+        run: echo "/usr/lib/ccache:/usr/local/opt/ccache/libexec" >> $GITHUB_PATH
+
+      # TODO See https://github.com/hendrikmuhs/ccache-action/issues/94
+      - name: Configure ccache
+        # run: |
+        #   ccache --set-config="compiler_check=content"
+        #   ccache --show-config
+        run: |
+          ccache --show-config
+
+      - name: Build packages
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make --directory=../
+          ../hello_cmake
